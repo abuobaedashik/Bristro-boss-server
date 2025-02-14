@@ -35,7 +35,7 @@ async function run() {
     // const BookedCarCollection =client.db('CarsDB').collection('bookedCar')
 
 
-    // user apies 
+    // all user related apies  
 
     app.get('/user',async(req,res)=>{
       const result = await UserCollection.find().toArray()
@@ -59,7 +59,7 @@ async function run() {
       const result =await UserCollection.deleteOne(query)
       res.send(result)
     })
-    
+
     app.patch('/user/admin/:id',async(req,res)=>{
       const id =req.params.id;
       const filter={_id: new ObjectId(id)}
