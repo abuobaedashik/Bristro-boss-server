@@ -4,6 +4,7 @@ const app =express()
 require('dotenv').config()
 // const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const morgan = require("morgan");
+var jwt = require('jsonwebtoken');
 const port =process.env.PORT || 5000 
 
 // middleware 
@@ -33,7 +34,15 @@ async function run() {
     const ReviewCollection = client.db('BristroBoss').collection('ReviewCollection')
     const CartCollection = client.db('BristroBoss').collection('Carts')
     // const BookedCarCollection =client.db('CarsDB').collection('bookedCar')
-
+     
+    // create token api
+    app.post('/user',async(req,res)=>{
+      const user =req.body
+      const token = jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{
+        expiresIn:'1h'
+      })
+      res.send({token})
+    })
 
     // all user related apies  
 
