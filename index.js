@@ -10,7 +10,7 @@ const port =process.env.PORT || 5000
 // middleware 
 app.use(cors())
 app.use(express.json())
-app.use(morgan("dev"));3
+app.use(morgan("dev"));
 
 
 
@@ -36,7 +36,7 @@ async function run() {
     // const BookedCarCollection =client.db('CarsDB').collection('bookedCar')
      
     // create token api
-    app.post('/user',async(req,res)=>{
+    app.post('/jwt',async(req,res)=>{
       const user =req.body
       const token = jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{
         expiresIn:'1h'
@@ -60,9 +60,21 @@ async function run() {
       })
     }
 
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.decoded.email;
+      const query = { email: email };
+      const user = await UserCollection.findOne(query);
+      const admin = user?.role === "admin";
+      if (!admin) {
+        return res.status(403).send({ message: "unauthorized access" });
+      }
+      next();
+    };
+
+
     // all user related apies  
 
-    app.get('/user',verifyToken,async(req,res)=>{
+    app.get('/user',verifyToken,verifyAdmin,async(req,res)=>{
      
       const result = await UserCollection.find().toArray()
       res.send(result)
@@ -99,11 +111,9 @@ async function run() {
     })
 
     // verify admin 
-    app.get('/user/admin/:email',verifyToken,async(req,res)=>{
+    app.get('/user/admin/:email',async(req,res)=>{
        const email =req.params.email;
-       if(email !== req.decoded.email ){
-        return res.status(403).send({message:"unauthorized access"})
-       }
+    
        const query = {email :email}
        const user = await UserCollection.findOne(query)
         let admin = false;
