@@ -74,7 +74,7 @@ async function run() {
 
     // all user related apies  
 
-    app.get('/user',verifyToken,verifyAdmin,async(req,res)=>{
+    app.get('/user',verifyToken,async(req,res)=>{
      
       const result = await UserCollection.find().toArray()
       res.send(result)
