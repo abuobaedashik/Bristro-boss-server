@@ -126,12 +126,22 @@ async function run() {
 
 
 
-     
+    // menu and review apis
+    
+    app.post('/menu',verifyToken,verifyAdmin,async(req,res)=>{
+      const menu = req.body;
+      const result = await MenuCollection.insertOne(menu)
+      res.send(result)
+    })
 
     app.get('/menu',async(req,res)=>{
          const result =await MenuCollection.find().toArray()
          res.send(result)
       })
+
+
+
+
     app.get('/review',async(req,res)=>{
          const result =await ReviewCollection.find().toArray()
          res.send(result)
