@@ -147,6 +147,33 @@ async function run() {
     })
 
 
+    // spasific menu item
+    app.get('/menu/:id',async(req,res)=>{
+      const id =req.params.id;
+      const query ={_id: new ObjectId(id)}
+      const result =await MenuCollection.findOne(query)
+      res.send(result)
+    })
+
+    app.patch('/menu/:id',async(req,res)=>{
+      const item = req.body;
+      const id =req.params.id;
+      const filter={_id: new ObjectId(id)}
+      const updatedDoc ={
+        
+        $set:{
+          name:item.name,
+          price:item.price,
+          image:item.image,
+          category:item.category,
+          recipe:item.recipe
+        }
+      }
+      const result =await MenuCollection.updateOne(filter, updatedDoc)
+      res.send(result)
+    })
+
+
 
 
     app.get('/review',async(req,res)=>{
