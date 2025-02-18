@@ -3,14 +3,13 @@ const cors = require('cors')
 const app =express()
 require('dotenv').config()
 // const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const morgan = require("morgan");
 var jwt = require('jsonwebtoken');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const port =process.env.PORT || 5000 
 
 // middleware 
 app.use(cors())
 app.use(express.json())
-app.use(morgan("dev"));
 
 
 
@@ -33,6 +32,7 @@ async function run() {
     const UserCollection = client.db('BristroBoss').collection('Users')
     const ReviewCollection = client.db('BristroBoss').collection('ReviewCollection')
     const CartCollection = client.db('BristroBoss').collection('Carts')
+    const PaymentCollection = client.db('BristroBoss').collection('Payments')
     // const BookedCarCollection =client.db('CarsDB').collection('bookedCar')
      
     // create token api
@@ -121,6 +121,61 @@ async function run() {
         admin = user?.role === 'admin'
        }
        res.send({admin})
+    })
+
+
+    // payment apis
+
+    app.post('/create-payment-intent', async (req, res) => {
+      const {price} =req.body;
+      const amout = price*100;
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amout,
+        currency: 'usd',
+        payment_method_types: ['card']
+      });
+
+      res.send({  clientSecret: paymentIntent.client_secret });
+
+    })
+
+
+    // payment get api
+    // app.get('/payments/:email',verifyToken,async(req,res)=>{
+    //    const query = { email: req.params.email };
+    //    if (req.params.email !== req.decoded.email) {
+    //       return res.status(403).send({message:"forbidden access"})
+    //    }
+    //    console.log("email",query)
+    //   const result =await PaymentCollection.find(query).toArray()
+    //   res.send(result)
+    // })
+    app.get('/payments', verifyToken, async (req, res) => {
+      console.log("Decoded Email:", req.decoded.email);
+      console.log("Requested Email:", req.query.email);
+  
+      if (req.query.email !== req.decoded.email) {
+          return res.status(403).send({ message: "Forbidden access" });
+      }
+      const query = { email: req.query.email };
+      const result = await PaymentCollection.find(query).toArray();
+      res.send(result);
+  });
+  
+
+    // payment post api
+    app.post('/payments',async(req,res)=>{
+      const payment = req.body;
+      const PaymentResult = await PaymentCollection.insertOne(payment)
+      // delete carts
+      console.log("payment",payment);
+      const query ={_id: {
+        $in: payment.cardIds.map((id)=>new ObjectId(id))
+      }}
+      const DeleteResult = await CartCollection.deleteMany(query)
+
+
+      res.send({PaymentResult,DeleteResult})
     })
 
 
