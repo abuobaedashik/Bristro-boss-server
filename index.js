@@ -179,6 +179,21 @@ async function run() {
     })
 
 
+    // admim statua 
+    app.get('/admin-status',verifyToken,verifyAdmin,async(req,res)=>{
+      const user =await UserCollection.estimatedDocumentCount();
+      const menu =await MenuCollection.estimatedDocumentCount();
+      const review =await ReviewCollection.estimatedDocumentCount();  
+      const order =await PaymentCollection.estimatedDocumentCount();
+      // not best way
+      const payments =await PaymentCollection.find().toArray()
+      const revenue = payments.reduce((total,payment)=>total+payment.price,0)
+
+
+      res.send({user,menu,review,order,revenue})
+    })
+
+
 
 
     // menu and review apis
