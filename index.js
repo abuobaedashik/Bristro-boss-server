@@ -28,6 +28,8 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
 
+    
+
     const MenuCollection = client.db('BristroBoss').collection('MenuCollection')
     const UserCollection = client.db('BristroBoss').collection('Users')
     const ReviewCollection = client.db('BristroBoss').collection('ReviewCollection')
@@ -43,6 +45,7 @@ async function run() {
       })
       res.send({token})
     })
+
 
     // middleware 
     const verifyToken = (req,res,next)=>{
@@ -140,16 +143,7 @@ async function run() {
     })
 
 
-    // payment get api
-    // app.get('/payments/:email',verifyToken,async(req,res)=>{
-    //    const query = { email: req.params.email };
-    //    if (req.params.email !== req.decoded.email) {
-    //       return res.status(403).send({message:"forbidden access"})
-    //    }
-    //    console.log("email",query)
-    //   const result =await PaymentCollection.find(query).toArray()
-    //   res.send(result)
-    // })
+    
     app.get('/payments', verifyToken, async (req, res) => {
       console.log("Decoded Email:", req.decoded.email);
       console.log("Requested Email:", req.query.email);
@@ -278,14 +272,16 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    // await client.db("admin").command({ ping: 1 });
+    // console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
   }
 }
 run().catch(console.dir);
+
+// now hosting baki
 
 
 
